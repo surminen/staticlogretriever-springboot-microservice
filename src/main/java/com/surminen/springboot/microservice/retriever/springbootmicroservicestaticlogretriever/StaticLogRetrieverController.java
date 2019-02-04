@@ -2,6 +2,7 @@ package com.surminen.springboot.microservice.retriever.springbootmicroservicesta
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,16 +30,36 @@ public class StaticLogRetrieverController
      * @param logData
      * @return TODO
      */
-    @GetMapping("/currency-converter-feign/from/{from}/logdata/{logData}")
-    public LogDataBean convertCurrencyFeign(@PathVariable String from, @PathVariable String logData)
+    @GetMapping("/add-log/from/{from}/logdata/{logData}")
+    public String addLog(@PathVariable String from, @PathVariable String logData)
     {
-        LogDataBean[] response = proxy.retrieveLogValue(from);
+        LogDataBean log = new LogDataBean(decodeDate(from), logData);
+        proxy.putLogValue(log);
 
-        logger.info("{}", response[0]);
+        return "New log added:<br>" + log;
+    }
 
-        proxy.putLogValue(new LogDataBean(decodeDate("11_11_2016"), "statically added log text"));
+    /**
+     * TODO
+     * 
+     * @return TODO
+     */
+    @GetMapping("/add-random-log")
+    public String addRandomLog()
+    {
+        Random rnd = new Random(System.currentTimeMillis());
 
-        return new LogDataBean(decodeDate(from), response[0].getLog());
+        // TODO obviously fix this to be able to include later days.
+        int day = rnd.nextInt(27) + 1;
+        int month = rnd.nextInt(11) + 1;
+        int year = rnd.nextInt(500) + 2000;
+
+        long logValue = rnd.nextLong();
+
+        LogDataBean log = new LogDataBean(decodeDate(String.format("%02d", day) + "_" + String.format("%02d", month) + "_" + year), "statically added log text #" + logValue);
+        proxy.putLogValue(log);
+
+        return "Random log added:<br>" + log;
     }
 
     /**
@@ -49,11 +70,9 @@ public class StaticLogRetrieverController
      */
     private LocalDate decodeDate(String date)
     {
-        // return from.replace("_", "/");
         System.out.println("Converting: " + date);
-        // Date x = new SimpleDateFormat("dd/MM/yyyy").parse(date.replace("_", "/"));
-        LocalDate y = LocalDate.parse(date.replace("_", "/"), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        LocalDate localDate = LocalDate.parse(date.replace("_", "/"), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
-        return y;
+        return localDate;
     }
 }

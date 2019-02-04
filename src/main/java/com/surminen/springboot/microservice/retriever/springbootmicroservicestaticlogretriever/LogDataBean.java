@@ -83,4 +83,10 @@ public class LogDataBean
         this.date = date;
         this.log = log;
     }
+    
+    @Override
+    public String toString()
+    {
+        return id + ", " + date + ", " + log;
+    }
 }
