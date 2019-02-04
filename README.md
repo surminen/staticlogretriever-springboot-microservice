@@ -1,0 +1,1 @@
+# staticlogretriever-springboot-microservice
